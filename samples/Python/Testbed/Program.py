@@ -8,6 +8,7 @@ import argparse
 import datetime
 import collections
 import inspect
+from decimal import *
 
 import logging
 import time
@@ -36,6 +37,8 @@ from OrderSamples import OrderSamples
 from AvailableAlgoParams import AvailableAlgoParams
 from ScannerSubscriptionSamples import ScannerSubscriptionSamples
 from FaAllocationSamples import FaAllocationSamples
+from TradingPlanItem import TradingPlanItem
+from TradingPlan import TradingPlan
 
 
 def SetupLogger():
@@ -46,13 +49,13 @@ def SetupLogger():
 
     recfmt = '(%(threadName)s) %(asctime)s.%(msecs)03d %(levelname)s %(filename)s:%(lineno)d %(message)s'
 
-    timefmt = '%y%m%d_%H:%M:%S'
+    timefmt = '%Y%m%d_%H:%M:%S'
 
     # logging.basicConfig( level=logging.DEBUG,
     #                    format=recfmt, datefmt=timefmt)
-    logging.basicConfig(filename=time.strftime("log/pyibapi.%y%m%d_%H%M%S.log"),
+    logging.basicConfig(filename=time.strftime("log/pyibapi.%Y%m%d_%H%M%S.log"),
                         filemode="w",
-                        level=logging.INFO,
+                        level=logging.DEBUG,
                         format=recfmt, datefmt=timefmt)
     logger = logging.getLogger()
     console = logging.StreamHandler()
@@ -229,12 +232,61 @@ class TestApp(TestWrapper, TestClient):
     def nextValidId(self, orderId: int):
         super().nextValidId(orderId)
 
-        logging.debug("setting nextValidOrderId: %d", orderId)
+        logging.info("setting nextValidOrderId: %d", orderId)
         self.nextValidOrderId = orderId
         # ! [nextvalidid]
 
         # we can start now
         self.start()
+
+    def setupTradingPlan(self):
+        self.tradingPlan = TradingPlan("MarketWatcher")
+
+       #tpItem = TradingPlanItem()
+       #tpItem.setup("MRVL", 1101, 25.45, 25.30, 200, 0, False, True)
+       #self.tradingPlan.addPlanItem(tpItem)
+
+       #tpItem = TradingPlanItem()
+       #tpItem.setup("AMD", 1102, 16.48, 16.25, 500, 0, False, False)
+       #self.tradingPlan.addPlanItem(tpItem)
+
+        tpItem = TradingPlanItem()
+        tpItem.setup("PSTG", 1103, 23.05, 23.0, 250, 0, False, False)
+        self.tradingPlan.addPlanItem(tpItem)
+
+        tpItem = TradingPlanItem()
+        tpItem.setup("NTNX", 1105, 57.68, 57.31, 100, 43, True, True)
+        self.tradingPlan.addPlanItem(tpItem)
+
+       #tpItem = TradingPlanItem()
+       #tpItem.setup("TWTR", 1106, 47.07, 46.95, 200, 0, True, False)
+       #self.tradingPlan.addPlanItem(tpItem)
+
+       #tpItem = TradingPlanItem()
+       #tpItem.setup("WB", 1107, 90.5, 90.3, 100, 0, False, False)
+       #self.tradingPlan.addPlanItem(tpItem)
+
+       #tpItem = TradingPlanItem()
+       #tpItem.setup("TSLA", 1108, 311.4, 311.95, 50, 0, False, False)
+       #self.tradingPlan.addPlanItem(tpItem)
+
+       #tpItem = TradingPlanItem()
+       #tpItem.setup("NVDA", 1109, 247.3, 246.8, 60, 0, False, False)
+       #self.tradingPlan.addPlanItem(tpItem)
+
+        tpItem = TradingPlanItem()
+        tpItem.setup("IQ", 1110, 34.57, 34.5, 150, -150, True, True)
+        self.tradingPlan.addPlanItem(tpItem)
+
+        tpItem = TradingPlanItem()
+        tpItem.setup("FB", 1111, 203.60, 203.30, 70, 0, False, False)
+        self.tradingPlan.addPlanItem(tpItem)
+
+        tpItem = TradingPlanItem()
+        tpItem.setup("SFIX", 1111, 33.87, 33.87, 150, -150, True, True)
+        self.tradingPlan.addPlanItem(tpItem)
+
+        self.tradingPlan.display()
 
     def start(self):
         if self.started:
@@ -247,9 +299,25 @@ class TestApp(TestWrapper, TestClient):
             self.reqGlobalCancel()
         else:
             print("Executing requests")
-            #self.reqGlobalCancel()
-            #self.marketDataType_req()
+            # Cancel all orders
+            self.reqGlobalCancel()
+            # Request RealTime market data
+            self.reqMarketDataType(MarketDataTypeEnum.REALTIME)
             #self.accountOperations_req()
+
+            # Request position updates
+            self.reqPositions()
+
+            queryTime = (datetime.datetime.today()).strftime("%Y%m%d %H:%M:%S")
+
+            # Request market data and today's Open price
+            for reqID,v in self.tradingPlan.plan.items():
+                if (v.isActive):
+                    self.reqRealTimeBars(reqID, ContractSamples.USStockAtSmart(v.symbol), 5, "TRADES", True, [])
+                    self.reqHistoricalData(reqID, ContractSamples.USStockAtSmart(v.symbol), queryTime,
+                                           "1 D", "1 day", "TRADES", 1, 1, False, [])
+
+            #self.accountOperations_cancel()
             #self.tickDataOperations_req()
             #self.marketDepthOperations_req()
             #self.realTimeBars_req()
@@ -316,9 +384,9 @@ class TestApp(TestWrapper, TestClient):
     def openOrder(self, orderId: OrderId, contract: Contract, order: Order,
                   orderState: OrderState):
         super().openOrder(orderId, contract, order, orderState)
-        print("OpenOrder. ID:", orderId, contract.symbol, contract.secType,
-              "@", contract.exchange, ":", order.action, order.orderType,
-              order.totalQuantity, orderState.status)
+        #print("OpenOrder. ID:", orderId, contract.symbol, contract.secType,
+        #      "@", contract.exchange, ":", order.action, order.orderType,
+        #      order.totalQuantity, orderState.status)
         # ! [openorder]
 
         if order.whatIf:
@@ -527,7 +595,21 @@ class TestApp(TestWrapper, TestClient):
         print("Position.", account, "Symbol:", contract.symbol, "SecType:",
               contract.secType, "Currency:", contract.currency,
               "Position:", position, "Avg cost:", avgCost)
+        
+        tpItem = self.tradingPlan.planKeyedBySymbol[contract.symbol]
+        # Update position info
+        if (tpItem.positionInitialized):
+            tpItem.lastPos     = tpItem.latestPos
+            tpItem.latestPos   = position
+        else:
+            tpItem.positionInitialized = True
+            tpItem.lastPos   = position
+            tpItem.latestPos = position
 
+        #if (tpItem.latestPos > tpItem.lastPos):
+        #    tpItem.buyAttempt = 0
+        #elif (tpItem.latestPos < tpItem.lastPos):
+        #    tpItem.sellAttempt = 0
     # ! [position]
 
 
@@ -738,7 +820,8 @@ class TestApp(TestWrapper, TestClient):
     # ! [ticksize]
     def tickSize(self, reqId: TickerId, tickType: TickType, size: int):
         super().tickSize(reqId, tickType, size)
-        print("Tick Size. Ticker Id:", reqId, "tickType:", tickType, "Size:", size)
+        print("Time: ", datetime.datetime.now(),
+              "Tick Size.  Ticker Id:", reqId, "tickType:", TickTypeEnum.to_str(tickType), "Size:", size)
 
     # ! [ticksize]
 
@@ -747,7 +830,8 @@ class TestApp(TestWrapper, TestClient):
     # ! [tickgeneric]
     def tickGeneric(self, reqId: TickerId, tickType: TickType, value: float):
         super().tickGeneric(reqId, tickType, value)
-        print("Tick Generic. Ticker Id:", reqId, "tickType:", tickType, "Value:", value)
+        print("Time: ", datetime.datetime.now(),
+              "Tick Generic. Ticker Id:", reqId, "tickType:", TickTypeEnum.to_str(tickType), "Value:", value)
 
     # ! [tickgeneric]
 
@@ -756,7 +840,8 @@ class TestApp(TestWrapper, TestClient):
     # ! [tickstring]
     def tickString(self, reqId: TickerId, tickType: TickType, value: str):
         super().tickString(reqId, tickType, value)
-        print("Tick string. Ticker Id:", reqId, "Type:", tickType, "Value:", value)
+        print("Time: ", datetime.datetime.now(),
+              "Tick string. Ticker Id:", reqId, "Type:", TickTypeEnum.to_str(tickType), "Value:", value)
 
     # ! [tickstring]
 
@@ -939,9 +1024,143 @@ class TestApp(TestWrapper, TestClient):
     def realtimeBar(self, reqId:TickerId, time:int, open:float, high:float,
                     low:float, close:float, volume:int, wap:float, count:int):
         super().realtimeBar(reqId, time, open, high, low, close, volume, wap, count)
-        print("RealTimeBars. ", reqId, ": time ", time, ", open: ",open,
-              ", high: ", high, ", low: ", low, ", close: ", close, ", volume: ", volume,
-              ", wap: ", wap, ", count: ", count)
+
+        tpItem = self.tradingPlan.plan[reqId]
+
+        if (tpItem.autoMode):
+            if (tpItem.todayOpenPrice == None):
+                # Update priceFiveSecsAgo
+                tpItem.priceFiveSecsAgo = close
+                return
+
+            targetBuyPrice  = Decimal(tpItem.todayOpenPrice) * Decimal(1.0015)
+            targetSellPrice = Decimal(tpItem.todayOpenPrice) * Decimal(0.9985)
+        else:
+            targetBuyPrice  = tpItem.targetBuyPrice
+            targetSellPrice = tpItem.targetSellPrice
+
+        # If we've tried more than 3 times to establish a position, we'll clear
+        # our target position, so we'd stay away from the stock for a while.
+        if (tpItem.buyAttempt >= 3 and tpItem.targetLongPos > 0):
+            print("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
+                  (tpItem.symbol, tpItem.buyAttempt))
+            logging.info("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
+                         (tpItem.symbol, tpItem.buyAttempt))
+            tpItem.targetLongPos = 0
+
+        if (tpItem.sellAttempt >= 3 and tpItem.targetShortPos < 0):
+            print("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
+                  (tpItem.symbol, tpItem.sellAttempt))
+            logging.info("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
+                         (tpItem.symbol, tpItem.sellAttempt))
+            tpItem.targetShortPos   = 0
+
+        # Detect price movement with reference to the price target
+        # Buy
+        if (tpItem.latestPos < tpItem.targetLongPos and
+            tpItem.priceFiveSecsAgo != None and
+            close > targetBuyPrice and
+            close > tpItem.priceFiveSecsAgo and
+            targetBuyPrice >= tpItem.priceFiveSecsAgo):
+
+            # Cancel the open order. Maybe the order has been filled already.
+            if (tpItem.lastOrderId != None):
+                self.cancelOrder(tpItem.lastOrderId)
+
+            # Increment buy attempt count
+            tpItem.buyAttempt += 1
+
+            print("BUY ", tpItem.symbol, "is triggered. ",
+                  " autoMode is ", tpItem.autoMode,
+                  " Today's Open price is ", tpItem.todayOpenPrice,
+                  " Its current price is ", close,
+                  " targetBuyPrice is ", targetBuyPrice,
+                  " priceFiveSecsAgo is ", tpItem.priceFiveSecsAgo,
+                  " targetLongPos is ", tpItem.targetLongPos,
+                  " latestPos is ", tpItem.latestPos,
+                  " buyAttempt is ", tpItem.buyAttempt)
+
+            logging.info("BUY %s is triggered." \
+                         " autoMode is %s;"\
+                         " Its current price is %f;" \
+                         " targetBuyPrice is %f;"\
+                         " priceFiveSecsAgo is %f;"\
+                         " targetLongPos is %d;"\
+                         " latestPos is %d;" \
+                         " buyAttempt is %d;" %
+                         (tpItem.symbol,
+                          tpItem.autoMode,
+                          close,
+                          targetBuyPrice,
+                          tpItem.priceFiveSecsAgo,
+                          tpItem.targetLongPos,
+                          tpItem.latestPos,
+                          tpItem.buyAttempt))
+
+            # Place a MARKET buy order
+            myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
+            myOrderId   = self.nextOrderId()
+            myOrderSize = tpItem.targetLongPos - tpItem.latestPos
+            myOrder     = OrderSamples.MarketOrder("BUY", myOrderSize)
+
+            self.placeOrder(myOrderId, myContract, myOrder)
+
+            tpItem.lastOrderId = myOrderId
+
+        # Sell
+        if (tpItem.latestPos > tpItem.targetShortPos and
+            tpItem.priceFiveSecsAgo != None and
+            close < targetSellPrice and
+            close < tpItem.priceFiveSecsAgo and
+            targetSellPrice <= tpItem.priceFiveSecsAgo):
+
+            # Cancel the open order. Maybe the order has been filled already.
+            if (tpItem.lastOrderId != None):
+                self.cancelOrder(tpItem.lastOrderId)
+
+            # Increment sell attempt count
+            tpItem.sellAttempt += 1
+
+            print("SELL", tpItem.symbol, "is triggered. ",
+                  " autoMode is ", tpItem.autoMode,
+                  " Today's Open price is ", tpItem.todayOpenPrice,
+                  " Its current price is ", close,
+                  " targetSellPrice is ", targetSellPrice,
+                  " priceFiveSecsAgo is ", tpItem.priceFiveSecsAgo,
+                  " targetShortPos is ", tpItem.targetShortPos,
+                  " latestPos is ", tpItem.latestPos,
+                  " sellAttempt is ", tpItem.sellAttempt)
+
+            logging.info("SELL %s is triggered." \
+                         " autoMode is %s;" \
+                         " current price is %f;" \
+                         " targetSellPrice is %f;" \
+                         " priceFiveSecsAgo is %f;" \
+                         " targetShortPos is %d;" \
+                         " latestPos is %d;" \
+                         " sellAttempt is %d;" %
+                         (tpItem.symbol,
+                          tpItem.autoMode,
+                          close,
+                          targetSellPrice,
+                          tpItem.priceFiveSecsAgo,
+                          tpItem.targetShortPos,
+                          tpItem.latestPos,
+                          tpItem.sellAttempt))
+
+            # Place a MARLET sell order
+            myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
+            myOrderId   = self.nextOrderId()
+            myOrderSize = tpItem.latestPos - tpItem.targetShortPos
+            myOrder     = OrderSamples.MarketOrder("SELL", myOrderSize)
+
+            self.placeOrder(myOrderId, myContract, myOrder)
+
+            tpItem.lastOrderId = myOrderId
+
+        # Update priceFiveSecsAgo
+        tpItem.priceFiveSecsAgo = close
+
     # ! [realtimebar]
 
     @printWhenExecuting
@@ -1021,6 +1240,13 @@ class TestApp(TestWrapper, TestClient):
         print("HistoricalData. ", reqId, " Date:", bar.date, "Open:", bar.open,
               "High:", bar.high, "Low:", bar.low, "Close:", bar.close, "Volume:", bar.volume,
               "Count:", bar.barCount, "WAP:", bar.average)
+        tpItem = self.tradingPlan.plan[reqId]
+        if (tpItem.todayOpenPrice == None):
+            tpItem.todayOpenPrice = bar.open
+        #    tpItem.priceFiveSecsAgo = bar.open
+            print("Set ", tpItem.symbol, " Open price to ", bar.open)
+            logging.info("Set %s Open price to %f" % (tpItem.symbol, bar.open))
+        super().historicalData(reqId, bar)
     # ! [historicaldata]
 
     @iswrapper
@@ -1859,15 +2085,15 @@ class TestApp(TestWrapper, TestClient):
     # ! [commissionreport]
     def commissionReport(self, commissionReport: CommissionReport):
         super().commissionReport(commissionReport)
-        print("CommissionReport. ", commissionReport.execId, commissionReport.commission,
-              commissionReport.currency, commissionReport.realizedPNL)
+        # print("CommissionReport. ", commissionReport.execId, commissionReport.commission,
+        #        commissionReport.currency, commissionReport.realizedPNL)
         # ! [commissionreport]
 
 
 def main():
     SetupLogger()
     logging.debug("now is %s", datetime.datetime.now())
-    logging.getLogger().setLevel(logging.ERROR)
+    logging.getLogger().setLevel(logging.INFO)
 
     cmdLineParser = argparse.ArgumentParser("api tests")
     # cmdLineParser.add_option("-c", action="store_True", dest="use_cache", default = False, help = "use the cache")
@@ -1899,24 +2125,29 @@ def main():
     PercentChangeCondition.__setattr__ = utils.setattr_log
     VolumeCondition.__setattr__ = utils.setattr_log
 
-    # from inspect import signature as sig
-    # import code code.interact(local=dict(globals(), **locals()))
-    # sys.exit(1)
-
-    # tc = TestClient(None)
-    # tc.reqMktData(1101, ContractSamples.USStockAtSmart(), "", False, None)
-    # print(tc.reqId2nReq)
-    # sys.exit(1)
+    # Set the precision
+    getcontext().prec = 4
 
     try:
         app = TestApp()
         if args.global_cancel:
             app.globalCancelOnly = True
         # ! [connect]
-        app.connect("127.0.0.1", args.port, clientId=0)
+        # Paper trading port number: 7497
+        # Live trading port number:  7496
+        app.connect("127.0.0.1", 7496, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
+
+        # Buy is Market Order
+        # Sell is Market order
+        # Maximum buy attempt is 2
+        # Maximum sell attempt is 2
+        # Loss margin is 0.15%
+
+        # setup tranding plan
+        app.setupTradingPlan()
 
         # ! [clientrun]
         app.run()
