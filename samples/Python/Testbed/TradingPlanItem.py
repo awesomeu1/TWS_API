@@ -29,10 +29,16 @@ class TradingPlanItem():
                  self.targetBuyPrice, self.targetSellPrice,
                  self.targetLongPos, self.targetShortPos))
 
-    def setup(self, symbol:str, reqID:int,
-                    targetBuyPrice:float, targetSellPrice:float,
-                    targetLongPos:int, targetShortPos:int,
-                    active:bool, autoMode:bool=False):
+    def setup(self,
+              symbol:str,
+              reqID:int,
+              targetBuyPrice:float,
+              targetSellPrice:float,
+              targetLongPos:int,
+              targetShortPos:int,
+              active:bool,
+              autoMode:bool=False):
+
         if (not self.readOnly):
             self.symbol         = symbol
             self.targetBuyPrice = targetBuyPrice

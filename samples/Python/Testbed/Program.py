@@ -242,48 +242,22 @@ class TestApp(TestWrapper, TestClient):
     def setupTradingPlan(self):
         self.tradingPlan = TradingPlan("MarketWatcher")
 
-       #tpItem = TradingPlanItem()
-       #tpItem.setup("MRVL", 1101, 25.45, 25.30, 200, 0, False, True)
-       #self.tradingPlan.addPlanItem(tpItem)
+        # ReqId begins at 8800
+        reqId = 8800
 
-       #tpItem = TradingPlanItem()
-       #tpItem.setup("AMD", 1102, 16.48, 16.25, 500, 0, False, False)
-       #self.tradingPlan.addPlanItem(tpItem)
-
+        reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("PSTG", 1103, 23.05, 23.0, 250, 0, False, False)
+        tpItem.setup("PSTG", reqId, 23.05, 23.0, 250, 0, True, False)
         self.tradingPlan.addPlanItem(tpItem)
 
+        reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("NTNX", 1105, 57.68, 57.31, 100, 43, True, True)
+        tpItem.setup("NTNX", 1105, 57.68, 57.31, 100, 43, True, False)
         self.tradingPlan.addPlanItem(tpItem)
 
-       #tpItem = TradingPlanItem()
-       #tpItem.setup("TWTR", 1106, 47.07, 46.95, 200, 0, True, False)
-       #self.tradingPlan.addPlanItem(tpItem)
-
-       #tpItem = TradingPlanItem()
-       #tpItem.setup("WB", 1107, 90.5, 90.3, 100, 0, False, False)
-       #self.tradingPlan.addPlanItem(tpItem)
-
-       #tpItem = TradingPlanItem()
-       #tpItem.setup("TSLA", 1108, 311.4, 311.95, 50, 0, False, False)
-       #self.tradingPlan.addPlanItem(tpItem)
-
-       #tpItem = TradingPlanItem()
-       #tpItem.setup("NVDA", 1109, 247.3, 246.8, 60, 0, False, False)
-       #self.tradingPlan.addPlanItem(tpItem)
-
+        reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("IQ", 1110, 34.57, 34.5, 150, -150, True, True)
-        self.tradingPlan.addPlanItem(tpItem)
-
-        tpItem = TradingPlanItem()
-        tpItem.setup("FB", 1111, 203.60, 203.30, 70, 0, False, False)
-        self.tradingPlan.addPlanItem(tpItem)
-
-        tpItem = TradingPlanItem()
-        tpItem.setup("SFIX", 1111, 33.87, 33.87, 150, -150, True, True)
+        tpItem.setup("FB", 1111, 203.60, 203.30, 70, 0, True, False)
         self.tradingPlan.addPlanItem(tpItem)
 
         self.tradingPlan.display()
@@ -317,26 +291,8 @@ class TestApp(TestWrapper, TestClient):
                     self.reqHistoricalData(reqID, ContractSamples.USStockAtSmart(v.symbol), queryTime,
                                            "1 D", "1 day", "TRADES", 1, 1, False, [])
 
-            #self.accountOperations_cancel()
-            #self.tickDataOperations_req()
-            #self.marketDepthOperations_req()
-            #self.realTimeBars_req()
-            #self.historicalDataRequests_req()
-            #self.optionsOperations_req()
-            #self.marketScanners_req()
-            #self.reutersFundamentals_req()
-            #self.bulletins_req()
-            #self.contractOperations_req()
-            #self.contractNewsFeed_req()
-            #self.miscelaneous_req()
-            #self.linkingOperations()
-            #self.financialAdvisorOperations()
-            #self.orderOperations_req()
-            #self.marketRuleOperations()
-            #self.pnlOperations()
-            #self.historicalTicksRequests_req()
-            #self.tickByTickOperations()
-            self.whatIfOrder_req()
+            # TODO: What's WahtIfOrder?
+            #self.whatIfOrder_req()
             print("Executing requests ... finished")
 
     def keyboardInterrupt(self):
@@ -595,7 +551,7 @@ class TestApp(TestWrapper, TestClient):
         print("Position.", account, "Symbol:", contract.symbol, "SecType:",
               contract.secType, "Currency:", contract.currency,
               "Position:", position, "Avg cost:", avgCost)
-        
+
         tpItem = self.tradingPlan.planKeyedBySymbol[contract.symbol]
         # Update position info
         if (tpItem.positionInitialized):
@@ -930,7 +886,7 @@ class TestApp(TestWrapper, TestClient):
             print(" unreported", end='')
         print()
 	# ! [tickbytickalllast]
-		
+
     @iswrapper
 	# ! [tickbytickbidask]
     def tickByTickBidAsk(self, reqId: int, time: int, bidPrice: float, askPrice: float,
@@ -946,9 +902,9 @@ class TestApp(TestWrapper, TestClient):
         if attribs.askPastHigh:
             print(" askPastHigh", end='')
         print()
-		
+
 	# ! [tickbytickbidask]
-		
+
 	# ! [tickbytickmidpoint]
     @iswrapper
     def tickByTickMidPoint(self, reqId: int, time: int, midPoint: float):
@@ -958,7 +914,7 @@ class TestApp(TestWrapper, TestClient):
               " MidPoint: ", midPoint)
 
 	# ! [tickbytickmidpoint]
-			  
+
     @printWhenExecuting
     def marketDepthOperations_req(self):
         # Requesting the Deep Book
@@ -2054,7 +2010,7 @@ class TestApp(TestWrapper, TestClient):
     def marketRuleOperations(self):
         self.reqContractDetails(17001, ContractSamples.USStock())
         self.reqContractDetails(17002, ContractSamples.Bond())
-		
+
         time.sleep(1)
 
         # ! [reqmarketrule]
@@ -2095,20 +2051,6 @@ def main():
     logging.debug("now is %s", datetime.datetime.now())
     logging.getLogger().setLevel(logging.INFO)
 
-    cmdLineParser = argparse.ArgumentParser("api tests")
-    # cmdLineParser.add_option("-c", action="store_True", dest="use_cache", default = False, help = "use the cache")
-    # cmdLineParser.add_option("-f", action="store", type="string", dest="file", default="", help="the input file")
-    cmdLineParser.add_argument("-p", "--port", action="store", type=int,
-                               dest="port", default=7497, help="The TCP port to use")
-    cmdLineParser.add_argument("-C", "--global-cancel", action="store_true",
-                               dest="global_cancel", default=False,
-                               help="whether to trigger a globalCancel req")
-    args = cmdLineParser.parse_args()
-    print("Using args", args)
-    logging.debug("Using args %s", args)
-    # print(args)
-
-
     # enable logging when member vars are assigned
     from ibapi import utils
     from ibapi.order import Order
@@ -2130,12 +2072,10 @@ def main():
 
     try:
         app = TestApp()
-        if args.global_cancel:
-            app.globalCancelOnly = True
         # ! [connect]
         # Paper trading port number: 7497
         # Live trading port number:  7496
-        app.connect("127.0.0.1", 7496, clientId=95131)
+        app.connect("127.0.0.1", 7497, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
