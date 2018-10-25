@@ -149,14 +149,13 @@ class ContractSamples:
 
             
     @staticmethod
-    def USStockAtSmart():
+    def USStockAtSmart(symbol:str):
         contract = Contract()
-        contract.symbol = "IBKR"
+        contract.symbol = symbol
         contract.secType = "STK"
         contract.currency = "USD"
         contract.exchange = "SMART"
         return contract
-
 
     @staticmethod
     def USOptionContract():

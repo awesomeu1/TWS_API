@@ -247,17 +247,17 @@ class TestApp(TestWrapper, TestClient):
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("PSTG", reqId, 23.05, 23.0, 250, 0, True, False)
+        tpItem.setup("FB", reqId, 146.04, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("NTNX", 1105, 57.68, 57.31, 100, 43, True, False)
+        tpItem.setup("NVDA", reqId, 199.41, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("FB", 1111, 203.60, 203.30, 70, 0, True, False)
+        tpItem.setup("QCOM", reqId, 62.62, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         self.tradingPlan.display()
@@ -286,10 +286,9 @@ class TestApp(TestWrapper, TestClient):
 
             # Request market data and today's Open price
             for reqID,v in self.tradingPlan.plan.items():
-                if (v.isActive):
-                    self.reqRealTimeBars(reqID, ContractSamples.USStockAtSmart(v.symbol), 5, "TRADES", True, [])
-                    self.reqHistoricalData(reqID, ContractSamples.USStockAtSmart(v.symbol), queryTime,
-                                           "1 D", "1 day", "TRADES", 1, 1, False, [])
+                self.reqRealTimeBars(reqID, ContractSamples.USStockAtSmart(v.symbol), 5, "TRADES", True, [])
+                self.reqHistoricalData(reqID, ContractSamples.USStockAtSmart(v.symbol), queryTime,
+                                       "1 D", "1 day", "TRADES", 1, 1, False, [])
 
             # TODO: What's WahtIfOrder?
             #self.whatIfOrder_req()
@@ -992,19 +991,23 @@ class TestApp(TestWrapper, TestClient):
             targetBuyPrice  = Decimal(tpItem.todayOpenPrice) * Decimal(1.0015)
             targetSellPrice = Decimal(tpItem.todayOpenPrice) * Decimal(0.9985)
         else:
-            targetBuyPrice  = tpItem.targetBuyPrice
-            targetSellPrice = tpItem.targetSellPrice
+            targetBuyPrice  = Decimal(tpItem.targetBuyPrice)
+            targetSellPrice = Decimal(targetBuyPrice * 0.9995)
 
         # If we've tried more than 3 times to establish a position, we'll clear
         # our target position, so we'd stay away from the stock for a while.
-        if (tpItem.buyAttempt >= 3 and tpItem.targetLongPos > 0):
+        if (tpItem.buyAttempt >= tpItem.targetBuyAttempt and
+            tpItem.targetLongPos > 0):
+
             print("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
                   (tpItem.symbol, tpItem.buyAttempt))
             logging.info("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
                          (tpItem.symbol, tpItem.buyAttempt))
             tpItem.targetLongPos = 0
 
-        if (tpItem.sellAttempt >= 3 and tpItem.targetShortPos < 0):
+        if (tpItem.sellAttempt >= tpItem.targetSellAttempt and
+            tpItem.targetShortPos < 0):
+
             print("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
                   (tpItem.symbol, tpItem.sellAttempt))
             logging.info("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
@@ -1015,8 +1018,8 @@ class TestApp(TestWrapper, TestClient):
         # Buy
         if (tpItem.latestPos < tpItem.targetLongPos and
             tpItem.priceFiveSecsAgo != None and
-            close > targetBuyPrice and
-            close > tpItem.priceFiveSecsAgo and
+            close >= targetBuyPrice and
+            close >= tpItem.priceFiveSecsAgo and
             targetBuyPrice >= tpItem.priceFiveSecsAgo):
 
             # Cancel the open order. Maybe the order has been filled already.
@@ -1053,11 +1056,11 @@ class TestApp(TestWrapper, TestClient):
                           tpItem.latestPos,
                           tpItem.buyAttempt))
 
-            # Place a MARKET buy order
+            # Place a Midpoint buy order
             myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.targetLongPos - tpItem.latestPos
-            myOrder     = OrderSamples.MarketOrder("BUY", myOrderSize)
+            myOrder     = OrderSamples.MidpointMatch("BUY", myOrderSize)
 
             self.placeOrder(myOrderId, myContract, myOrder)
 
@@ -1108,7 +1111,7 @@ class TestApp(TestWrapper, TestClient):
             myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.latestPos - tpItem.targetShortPos
-            myOrder     = OrderSamples.MarketOrder("SELL", myOrderSize)
+            myOrder     = OrderSamples.MidpointMatch("SELL", myOrderSize)
 
             self.placeOrder(myOrderId, myContract, myOrder)
 
@@ -1199,7 +1202,6 @@ class TestApp(TestWrapper, TestClient):
         tpItem = self.tradingPlan.plan[reqId]
         if (tpItem.todayOpenPrice == None):
             tpItem.todayOpenPrice = bar.open
-        #    tpItem.priceFiveSecsAgo = bar.open
             print("Set ", tpItem.symbol, " Open price to ", bar.open)
             logging.info("Set %s Open price to %f" % (tpItem.symbol, bar.open))
         super().historicalData(reqId, bar)

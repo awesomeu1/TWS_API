@@ -9,6 +9,8 @@ class TradingPlanItem():
         self.targetSellPrice        = None
         self.targetLongPos          = None
         self.targetShortPos         = None
+        self.targetBuyAttempt       = 100
+        self.targetSellAttempt      = 100
         self.reqID                  = None
         self.readOnly               = False
         self.priceFiveSecsAgo       = None
@@ -18,16 +20,18 @@ class TradingPlanItem():
         self.lastPos                = 0
         self.lastOrderId            = None
         self.positionInitialized    = False
-        self.isActive               = False
         self.todayOpenPrice         = None
         self.autoMode               = False
 
     def __str__(self):
-        return ("symbol %s isActive %s; autoMode %s; targetBuyPrice %f; targetSellPrice %f;"\
-                " targetLongPos %d; targetShortPos %d;" %
-                (self.symbol, self.isActive, self.autoMode,
-                 self.targetBuyPrice, self.targetSellPrice,
-                 self.targetLongPos, self.targetShortPos))
+        return ("symbol = %s;\tautoMode=%s;\ttargetBuyPrice=%10f;\ttargetSellPrice=%10f;\t"\
+                "targetLongPos=%d;\ttargetShortPos=%d;" %
+                (self.symbol,
+                 self.autoMode,
+                 self.targetBuyPrice,
+                 self.targetSellPrice,
+                 self.targetLongPos,
+                 self.targetShortPos))
 
     def setup(self,
               symbol:str,
@@ -36,18 +40,15 @@ class TradingPlanItem():
               targetSellPrice:float,
               targetLongPos:int,
               targetShortPos:int,
-              active:bool,
               autoMode:bool=False):
-
         if (not self.readOnly):
             self.symbol         = symbol
+            self.reqID          = reqID
             self.targetBuyPrice = targetBuyPrice
             self.targetSellPrice= targetSellPrice
             self.targetLongPos  = targetLongPos
             self.targetShortPos = targetShortPos
-            self.readOnly       = True
-            self.reqID          = reqID
-            self.isActive       = active
             self.autoMode       = autoMode
+            self.readOnly       = True
         else:
             logging.error("ERROR. You're trying to override the TrandingPlanItem of: ", self)
