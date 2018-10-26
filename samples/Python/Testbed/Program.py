@@ -247,12 +247,12 @@ class TestApp(TestWrapper, TestClient):
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("FB", reqId, 146.04, 0, 200, 0)
+        tpItem.setup("FB", reqId, 147.44, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("NVDA", reqId, 199.41, 0, 200, 0)
+        tpItem.setup("NVDA", reqId, 194.17, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
@@ -992,7 +992,7 @@ class TestApp(TestWrapper, TestClient):
             targetSellPrice = Decimal(tpItem.todayOpenPrice) * Decimal(0.9985)
         else:
             targetBuyPrice  = Decimal(tpItem.targetBuyPrice)
-            targetSellPrice = Decimal(targetBuyPrice * 0.9995)
+            targetSellPrice = Decimal(Decimal(targetBuyPrice) * Decimal(0.9995))
 
         # If we've tried more than 3 times to establish a position, we'll clear
         # our target position, so we'd stay away from the stock for a while.
@@ -1029,7 +1029,7 @@ class TestApp(TestWrapper, TestClient):
             # Increment buy attempt count
             tpItem.buyAttempt += 1
 
-            print("BUY ", tpItem.symbol, "is triggered. ",
+            print("@@@ BUY ", tpItem.symbol, "is triggered. @@@",
                   " autoMode is ", tpItem.autoMode,
                   " Today's Open price is ", tpItem.todayOpenPrice,
                   " Its current price is ", close,
@@ -1039,7 +1039,7 @@ class TestApp(TestWrapper, TestClient):
                   " latestPos is ", tpItem.latestPos,
                   " buyAttempt is ", tpItem.buyAttempt)
 
-            logging.info("BUY %s is triggered." \
+            logging.info("@@@ BUY %s is triggered. @@@" \
                          " autoMode is %s;"\
                          " Its current price is %f;" \
                          " targetBuyPrice is %f;"\
@@ -1080,7 +1080,7 @@ class TestApp(TestWrapper, TestClient):
             # Increment sell attempt count
             tpItem.sellAttempt += 1
 
-            print("SELL", tpItem.symbol, "is triggered. ",
+            print("@@@ SELL", tpItem.symbol, "is triggered. @@@",
                   " autoMode is ", tpItem.autoMode,
                   " Today's Open price is ", tpItem.todayOpenPrice,
                   " Its current price is ", close,
@@ -1090,7 +1090,7 @@ class TestApp(TestWrapper, TestClient):
                   " latestPos is ", tpItem.latestPos,
                   " sellAttempt is ", tpItem.sellAttempt)
 
-            logging.info("SELL %s is triggered." \
+            logging.info("@@@ SELL %s is triggered. @@@" \
                          " autoMode is %s;" \
                          " current price is %f;" \
                          " targetSellPrice is %f;" \
