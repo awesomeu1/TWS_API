@@ -247,20 +247,24 @@ class TestApp(TestWrapper, TestClient):
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("FB", reqId, 147.44, 0, 200, 0)
+        tpItem.setup("FB", reqId, 143.4, 0, 100, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("NVDA", reqId, 194.17, 0, 200, 0)
+        tpItem.setup("NVDA", reqId, 193.6, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("QCOM", reqId, 62.62, 0, 200, 0)
+        tpItem.setup("QCOM", reqId, 63.1, 0, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
-        self.tradingPlan.display()
+        #reqId = reqId + 1
+        #tpItem = TradingPlanItem()
+        #tpItem.setup("TSLA", reqId, 330, 0, 100, 0)
+        #self.tradingPlan.addPlanItem(tpItem)
+        #self.tradingPlan.display()
 
     def start(self):
         if self.started:
@@ -1056,11 +1060,11 @@ class TestApp(TestWrapper, TestClient):
                           tpItem.latestPos,
                           tpItem.buyAttempt))
 
-            # Place a Midpoint buy order
+            # Place a buy order
             myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.targetLongPos - tpItem.latestPos
-            myOrder     = OrderSamples.MidpointMatch("BUY", myOrderSize)
+            myOrder     = OrderSamples.LimitOrder("BUY", myOrderSize, targetBuyPrice)
 
             self.placeOrder(myOrderId, myContract, myOrder)
 
@@ -1107,11 +1111,11 @@ class TestApp(TestWrapper, TestClient):
                           tpItem.latestPos,
                           tpItem.sellAttempt))
 
-            # Place a MARLET sell order
+            # Place a sell order
             myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.latestPos - tpItem.targetShortPos
-            myOrder     = OrderSamples.MidpointMatch("SELL", myOrderSize)
+            myOrder     = OrderSamples.LimitOrder("SELL", myOrderSize, targetSellPrice)
 
             self.placeOrder(myOrderId, myContract, myOrder)
 
@@ -2081,12 +2085,6 @@ def main():
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
-
-        # Buy is Market Order
-        # Sell is Market order
-        # Maximum buy attempt is 2
-        # Maximum sell attempt is 2
-        # Loss margin is 0.15%
 
         # setup tranding plan
         app.setupTradingPlan()
