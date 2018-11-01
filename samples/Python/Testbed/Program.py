@@ -247,17 +247,17 @@ class TestApp(TestWrapper, TestClient):
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("FB", reqId, 143.4, 0, 100, 0)
+        tpItem.setup("FB", reqId, 152, 0, 100, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("NVDA", reqId, 193.6, 0, 200, 0)
+        tpItem.setup("NVDA", reqId, 206, 0, 400, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("QCOM", reqId, 63.1, 0, 200, 0)
+        tpItem.setup("QCOM", reqId, 62.6, 0, 400, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         #reqId = reqId + 1
@@ -2074,7 +2074,7 @@ def main():
     VolumeCondition.__setattr__ = utils.setattr_log
 
     # Set the precision
-    getcontext().prec = 4
+    getcontext().prec = 6
 
     try:
         app = TestApp()
