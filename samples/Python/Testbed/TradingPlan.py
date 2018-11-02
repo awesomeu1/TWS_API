@@ -15,7 +15,9 @@ class TradingPlan:
 
     def display(self):
         print("Info about TradingPlan {}:".format(self.name))
+        print("===============================================================")
         for item in self.plan.values():
             print(item)
+        print("===============================================================")
         print("Info about TradingPlan {} done.".format(self.name))
 
