@@ -8,7 +8,6 @@ import argparse
 import datetime
 import collections
 import inspect
-from decimal import *
 
 import logging
 import time
@@ -247,24 +246,26 @@ class TestApp(TestWrapper, TestClient):
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("FB", reqId, 152, 0, 100, 0)
+        targetBuyPrice  = 152.00
+        targetSellPrice = round(targetBuyPrice * 0.9995, 2)
+        tpItem.setup("FB", reqId, targetBuyPrice, targetSellPrice, 100, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("NVDA", reqId, 206, 0, 400, 0)
+        targetBuyPrice  = 152.00
+        targetSellPrice = round(targetBuyPrice * 0.9995, 2)
+        tpItem.setup("NVDA", reqId, targetBuyPrice, targetSellPrice, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
         reqId = reqId + 1
         tpItem = TradingPlanItem()
-        tpItem.setup("QCOM", reqId, 62.6, 0, 400, 0)
+        targetBuyPrice  = 63.80
+        targetSellPrice = round(targetBuyPrice * 0.9995, 2)
+        tpItem.setup("QCOM", reqId, targetBuyPrice, targetSellPrice, 200, 0)
         self.tradingPlan.addPlanItem(tpItem)
 
-        #reqId = reqId + 1
-        #tpItem = TradingPlanItem()
-        #tpItem.setup("TSLA", reqId, 330, 0, 100, 0)
-        #self.tradingPlan.addPlanItem(tpItem)
-        #self.tradingPlan.display()
+        self.tradingPlan.display()
 
     def start(self):
         if self.started:
@@ -986,19 +987,10 @@ class TestApp(TestWrapper, TestClient):
 
         tpItem = self.tradingPlan.plan[reqId]
 
-        if (tpItem.autoMode):
-            if (tpItem.todayOpenPrice == None):
-                # Update priceFiveSecsAgo
-                tpItem.priceFiveSecsAgo = close
-                return
+        targetBuyPrice  = tpItem.targetBuyPrice
+        targetSellPrice = tpItem.targetSellPrice
 
-            targetBuyPrice  = Decimal(tpItem.todayOpenPrice) * Decimal(1.0015)
-            targetSellPrice = Decimal(tpItem.todayOpenPrice) * Decimal(0.9985)
-        else:
-            targetBuyPrice  = Decimal(tpItem.targetBuyPrice)
-            targetSellPrice = Decimal(Decimal(targetBuyPrice) * Decimal(0.9995))
-
-        # If we've tried more than 3 times to establish a position, we'll clear
+        # If we've tried more than X times to establish a position, we'll clear
         # our target position, so we'd stay away from the stock for a while.
         if (tpItem.buyAttempt >= tpItem.targetBuyAttempt and
             tpItem.targetLongPos > 0):
@@ -2072,9 +2064,6 @@ def main():
     PriceCondition.__setattr__ = utils.setattr_log
     PercentChangeCondition.__setattr__ = utils.setattr_log
     VolumeCondition.__setattr__ = utils.setattr_log
-
-    # Set the precision
-    getcontext().prec = 6
 
     try:
         app = TestApp()
