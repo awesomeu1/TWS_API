@@ -9,7 +9,7 @@ class TradingPlan:
         self.planKeyedBySymbol = {}
 
     def addPlanItem(self, item: TradingPlanItem):
-        self.plan.update({item.reqID: item})
+        self.plan.update({item.reqId: item})
         self.planKeyedBySymbol.update({item.symbol: item})
 
     def display(self):

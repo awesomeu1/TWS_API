@@ -1,4 +1,5 @@
 import logging
+from ibapi.common import *
 
 
 class TradingPlanItem:
@@ -13,7 +14,7 @@ class TradingPlanItem:
         self.targetShortPos = None
         self.targetBuyAttempt = 100
         self.targetSellAttempt = 100
-        self.reqID = None
+        self.reqId = None
         self.readOnly = False
         self.priceFiveSecsAgo = None
         self.buyAttempt = 0
@@ -37,7 +38,7 @@ class TradingPlanItem:
 
     def setup(self,
               symbol: str,
-              reqID: int,
+              reqId: TickerId,
               targetBuyPrice: float,
               targetSellPrice: float,
               targetLongPos: int,
@@ -45,7 +46,7 @@ class TradingPlanItem:
               autoMode: bool = False):
         if not self.readOnly:
             self.symbol = symbol
-            self.reqID = reqID
+            self.reqId = reqId
             self.targetBuyPrice = targetBuyPrice
             self.targetSellPrice = targetSellPrice
             self.targetLongPos = targetLongPos
