@@ -43,7 +43,7 @@ class TradingPlanItem:
               targetSellPrice: float,
               targetLongPos: int,
               targetShortPos: int,
-              autoMode: bool = False):
+              autoMode: bool):
         if not self.readOnly:
             self.symbol = symbol
             self.reqId = reqId

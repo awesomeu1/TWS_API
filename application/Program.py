@@ -11,6 +11,7 @@ import inspect
 import logging
 import time
 import os.path
+import yaml
 
 from ibapi import wrapper
 from ibapi import utils
@@ -18,16 +19,12 @@ from ibapi.client import EClient
 from ibapi.utils import iswrapper
 
 # types
-from ibapi.common import * # @UnusedWildImport
-from ibapi.order_condition import * # @UnusedWildImport
-from ibapi.contract import * # @UnusedWildImport
-from ibapi.order import * # @UnusedWildImport
-from ibapi.order_state import * # @UnusedWildImport
-from ibapi.ticktype import * # @UnusedWildImport
-from ibapi.tag_value import TagValue
+from ibapi.common import *
+from ibapi.contract import Contract
+from ibapi.order import Order
+from ibapi.order_state import OrderState
 
-from ibapi.account_summary_tags import *
-
+# My own modules
 from Contracts import Contracts
 from Orders import Orders
 from TradingPlanItem import TradingPlanItem
@@ -202,30 +199,12 @@ class TestApp(TestWrapper, TestClient):
     def setupTradingPlan(self):
         self.tradingPlan = TradingPlan("MarketWatcher")
 
+        tPlanFile = open("trading_plan.yml", "r")
+        tPlanYaml = yaml.load(tPlanFile, Loader=yaml.FullLoader)
+        tPlanFile.close()
+
         # ReqId begins at 8800
-        reqId = 8800
-
-        reqId = reqId + 1
-        tpItem = TradingPlanItem()
-        targetBuyPrice  = 152.00
-        targetSellPrice = round(targetBuyPrice * 0.9995, 2)
-        tpItem.setup("FB", reqId, targetBuyPrice, targetSellPrice, 100, 0)
-        self.tradingPlan.addPlanItem(tpItem)
-
-        reqId = reqId + 1
-        tpItem = TradingPlanItem()
-        targetBuyPrice  = 152.00
-        targetSellPrice = round(targetBuyPrice * 0.9995, 2)
-        tpItem.setup("NVDA", reqId, targetBuyPrice, targetSellPrice, 200, 0)
-        self.tradingPlan.addPlanItem(tpItem)
-
-        reqId = reqId + 1
-        tpItem = TradingPlanItem()
-        targetBuyPrice  = 63.80
-        targetSellPrice = round(targetBuyPrice * 0.9995, 2)
-        tpItem.setup("QCOM", reqId, targetBuyPrice, targetSellPrice, 200, 0)
-        self.tradingPlan.addPlanItem(tpItem)
-
+        self.tradingPlan.parseYaml(tPlanYaml, 8800)
         self.tradingPlan.display()
 
     def start(self):
@@ -509,27 +488,22 @@ def main():
     logging.getLogger().setLevel(logging.INFO)
 
     # enable logging when member vars are assigned
-    from ibapi import utils
-    from ibapi.order import Order
-    Order.__setattr__ = utils.setattr_log
-    from ibapi.contract import Contract, DeltaNeutralContract
-    Contract.__setattr__ = utils.setattr_log
-    DeltaNeutralContract.__setattr__ = utils.setattr_log
-    from ibapi.tag_value import TagValue
-    TagValue.__setattr__ = utils.setattr_log
-    TimeCondition.__setattr__ = utils.setattr_log
-    ExecutionCondition.__setattr__ = utils.setattr_log
-    MarginCondition.__setattr__ = utils.setattr_log
-    PriceCondition.__setattr__ = utils.setattr_log
-    PercentChangeCondition.__setattr__ = utils.setattr_log
-    VolumeCondition.__setattr__ = utils.setattr_log
+   #Order.__setattr__ = utils.setattr_log
+   #Contract.__setattr__ = utils.setattr_log
+   #TagValue.__setattr__ = utils.setattr_log
+   #order_condition.TimeCondition.__setattr__ = utils.setattr_log
+   #order_condition.ExecutionCondition.__setattr__ = utils.setattr_log
+   #order_condition.MarginCondition.__setattr__ = utils.setattr_log
+   #order_condition.PriceCondition.__setattr__ = utils.setattr_log
+   #order_condition.PercentChangeCondition.__setattr__ = utils.setattr_log
+   #order_condition.VolumeCondition.__setattr__ = utils.setattr_log
 
     try:
         app = TestApp()
         # ! [connect]
         # Paper trading port number: 7497
         # Live trading port number:  7496
-        app.connect("127.0.0.1", 7497, clientId=95131)
+        app.connect("127.0.0.1", 7496, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
