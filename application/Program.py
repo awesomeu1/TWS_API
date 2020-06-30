@@ -27,7 +27,6 @@ from ibapi.order_state import OrderState
 # My own modules
 from Contracts import Contracts
 from Orders import Orders
-from TradingPlanItem import TradingPlanItem
 from TradingPlan import TradingPlan
 
 
@@ -247,16 +246,8 @@ class TestApp(TestWrapper, TestClient):
 
     def stop(self):
         print("Executing cancels")
-        self.orderOperations_cancel()
-        self.accountOperations_cancel()
-        self.tickDataOperations_cancel()
-        self.marketDepthOperations_cancel()
-        self.realTimeBars_cancel()
-        self.historicalDataRequests_cancel()
-        self.optionsOperations_cancel()
-        self.marketScanners_cancel()
-        self.reutersFundamentals_cancel()
-        self.bulletins_cancel()
+        for reqId, v in self.tradingPlan.plan.items():
+            self.cancelRealTimeBars(reqId)
         print("Executing cancels ... finished")
 
     def nextOrderId(self):
@@ -338,13 +329,13 @@ class TestApp(TestWrapper, TestClient):
         # Detect price movement with reference to the price target
         # Buy
         if (tpItem.latestPos < tpItem.targetLongPos and
-            tpItem.priceFiveSecsAgo != None and
+            tpItem.priceFiveSecsAgo is not None and
             close >= targetBuyPrice and
             close >= tpItem.priceFiveSecsAgo and
             targetBuyPrice >= tpItem.priceFiveSecsAgo):
 
             # Cancel the open order. Maybe the order has not been filled already.
-            if (tpItem.lastOrderId != None):
+            if (tpItem.lastOrderId is not None):
                 self.cancelOrder(tpItem.lastOrderId)
 
             # Increment buy attempt count
@@ -360,13 +351,13 @@ class TestApp(TestWrapper, TestClient):
                   " latestPos is ", tpItem.latestPos,
                   " buyAttempt is ", tpItem.buyAttempt)
 
-            logging.info("@@@ BUY %s is triggered. @@@" \
-                         " autoMode is %s;"\
-                         " Its current price is %f;" \
-                         " targetBuyPrice is %f;"\
-                         " priceFiveSecsAgo is %f;"\
-                         " targetLongPos is %d;"\
-                         " latestPos is %d;" \
+            logging.info("@@@ BUY %s is triggered. @@@"
+                         " autoMode is %s;"
+                         " Its current price is %f;"
+                         " targetBuyPrice is %f;"
+                         " priceFiveSecsAgo is %f;"
+                         " targetLongPos is %d;"
+                         " latestPos is %d;"
                          " buyAttempt is %d;" %
                          (tpItem.symbol,
                           tpItem.autoMode,
@@ -389,7 +380,7 @@ class TestApp(TestWrapper, TestClient):
 
         # Sell
         if (tpItem.latestPos > tpItem.targetShortPos and
-            tpItem.priceFiveSecsAgo != None and
+            tpItem.priceFiveSecsAgo is not None and
             close < targetSellPrice and
             close < tpItem.priceFiveSecsAgo and
             targetSellPrice <= tpItem.priceFiveSecsAgo):
@@ -411,13 +402,13 @@ class TestApp(TestWrapper, TestClient):
                   " latestPos is ", tpItem.latestPos,
                   " sellAttempt is ", tpItem.sellAttempt)
 
-            logging.info("@@@ SELL %s is triggered. @@@" \
-                         " autoMode is %s;" \
-                         " current price is %f;" \
-                         " targetSellPrice is %f;" \
-                         " priceFiveSecsAgo is %f;" \
-                         " targetShortPos is %d;" \
-                         " latestPos is %d;" \
+            logging.info("@@@ SELL %s is triggered. @@@"
+                         " autoMode is %s;"
+                         " current price is %f;"
+                         " targetSellPrice is %f;"
+                         " priceFiveSecsAgo is %f;"
+                         " targetShortPos is %d;"
+                         " latestPos is %d;"
                          " sellAttempt is %d;" %
                          (tpItem.symbol,
                           tpItem.autoMode,
@@ -486,17 +477,6 @@ def main():
     SetupLogger()
     logging.debug("now is %s", datetime.datetime.now())
     logging.getLogger().setLevel(logging.INFO)
-
-    # enable logging when member vars are assigned
-   #Order.__setattr__ = utils.setattr_log
-   #Contract.__setattr__ = utils.setattr_log
-   #TagValue.__setattr__ = utils.setattr_log
-   #order_condition.TimeCondition.__setattr__ = utils.setattr_log
-   #order_condition.ExecutionCondition.__setattr__ = utils.setattr_log
-   #order_condition.MarginCondition.__setattr__ = utils.setattr_log
-   #order_condition.PriceCondition.__setattr__ = utils.setattr_log
-   #order_condition.PercentChangeCondition.__setattr__ = utils.setattr_log
-   #order_condition.VolumeCondition.__setattr__ = utils.setattr_log
 
     try:
         app = TestApp()
