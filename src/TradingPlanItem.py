@@ -27,9 +27,10 @@ class TradingPlanItem:
         self.autoMode = False
 
     def __str__(self):
-        return ("symbol = %s;\tautoMode=%s;\ttargetBuyPrice=%10f;\ttargetSellPrice=%10f;\t"
+        return ("symbol = %s;\treqId=%d;\tautoMode=%s;\ttargetBuyPrice=%10f;\ttargetSellPrice=%10f;\t"
                 "targetLongPos=%d;\ttargetShortPos=%d;" %
                 (self.symbol,
+                 self.reqId,
                  self.autoMode,
                  self.targetBuyPrice,
                  self.targetSellPrice,

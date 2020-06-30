@@ -13,10 +13,10 @@ class Contracts:
     these four attributes.  """
 
     @staticmethod
-    def USStock():
+    def USStock(symbol: str):
         #! [stkcontract]
         contract = Contract()
-        contract.symbol = "IBKR"
+        contract.symbol = symbol
         contract.secType = "STK"
         contract.currency = "USD"
         #In the API side, NASDAQ is always defined as ISLAND in the exchange field
@@ -26,10 +26,10 @@ class Contracts:
 
 
     @staticmethod
-    def USStockWithPrimaryExch():
+    def USStockWithPrimaryExch(symbol: str):
         #! [stkcontractwithprimary]
         contract = Contract()
-        contract.symbol = "MSFT"
+        contract.symbol = symbol
         contract.secType = "STK"
         contract.currency = "USD"
         contract.exchange = "SMART"
@@ -41,9 +41,9 @@ class Contracts:
 
             
     @staticmethod
-    def USStockAtSmart():
+    def USStockAtSmart(symbol: str):
         contract = Contract()
-        contract.symbol = "IBM"
+        contract.symbol = symbol
         contract.secType = "STK"
         contract.currency = "USD"
         contract.exchange = "SMART"

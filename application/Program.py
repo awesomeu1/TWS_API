@@ -231,8 +231,8 @@ class TestApp(TestWrapper, TestClient):
 
             # Request market data and today's Open price
             for reqId,v in self.tradingPlan.plan.items():
-                self.reqRealTimeBars(reqId, ContractSamples.USStockAtSmart(v.symbol), 5, "TRADES", True, [])
-                self.reqHistoricalData(reqId, ContractSamples.USStockAtSmart(v.symbol), queryTime,
+                self.reqRealTimeBars(reqId, Contracts.USStockAtSmart(v.symbol), 5, "TRADES", True, [])
+                self.reqHistoricalData(reqId, Contracts.USStockAtSmart(v.symbol), queryTime,
                                        "1 D", "1 day", "TRADES", 1, 1, False, [])
 
             print("Executing requests ... finished")
@@ -343,7 +343,7 @@ class TestApp(TestWrapper, TestClient):
             close >= tpItem.priceFiveSecsAgo and
             targetBuyPrice >= tpItem.priceFiveSecsAgo):
 
-            # Cancel the open order. Maybe the order has been filled already.
+            # Cancel the open order. Maybe the order has not been filled already.
             if (tpItem.lastOrderId != None):
                 self.cancelOrder(tpItem.lastOrderId)
 
@@ -378,10 +378,10 @@ class TestApp(TestWrapper, TestClient):
                           tpItem.buyAttempt))
 
             # Place a buy order
-            myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
+            myContract  = Contracts.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.targetLongPos - tpItem.latestPos
-            myOrder     = OrderSamples.LimitOrder("BUY", myOrderSize, targetBuyPrice)
+            myOrder     = Orders.MarketOrder("BUY", myOrderSize)
 
             self.placeOrder(myOrderId, myContract, myOrder)
 
@@ -394,7 +394,7 @@ class TestApp(TestWrapper, TestClient):
             close < tpItem.priceFiveSecsAgo and
             targetSellPrice <= tpItem.priceFiveSecsAgo):
 
-            # Cancel the open order. Maybe the order has been filled already.
+            # Cancel the open order. Maybe the order has not been filled already.
             if (tpItem.lastOrderId != None):
                 self.cancelOrder(tpItem.lastOrderId)
 
@@ -429,10 +429,10 @@ class TestApp(TestWrapper, TestClient):
                           tpItem.sellAttempt))
 
             # Place a sell order
-            myContract  = ContractSamples.USStockAtSmart(tpItem.symbol)
+            myContract  = Contracts.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.latestPos - tpItem.targetShortPos
-            myOrder     = OrderSamples.LimitOrder("SELL", myOrderSize, targetSellPrice)
+            myOrder     = Orders.MarketOrder("SELL", myOrderSize)
 
             self.placeOrder(myOrderId, myContract, myOrder)
 
@@ -503,7 +503,7 @@ def main():
         # ! [connect]
         # Paper trading port number: 7497
         # Live trading port number:  7496
-        app.connect("127.0.0.1", 7496, clientId=95131)
+        app.connect("127.0.0.1", 7497, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
