@@ -204,7 +204,8 @@ class TestApp(TestWrapper, TestClient):
 
         # ReqId begins at 8800
         self.tradingPlan.parseYaml(tPlanYaml, 8800)
-        self.tradingPlan.display()
+        print(self.tradingPlan)
+        logging.info(self.tradingPlan)
 
     def start(self):
         if self.started:
@@ -346,15 +347,13 @@ class TestApp(TestWrapper, TestClient):
                    " priceFiveSecsAgo={}"
                    " targetLongPos={}"
                    " latestPos={}"
-                   " buyAttempt={}"
-                   " autoMode={}").format(tpItem.symbol,
+                   " buyAttempt={}").format(tpItem.symbol,
                                         close,
                                         targetBuyPrice,
                                         tpItem.priceFiveSecsAgo,
                                         tpItem.targetLongPos,
                                         tpItem.latestPos,
-                                        tpItem.buyAttempt,
-                                        tpItem.autoMode)
+                                        tpItem.buyAttempt)
 
             print(msg)
             logging.info(msg)
@@ -389,15 +388,13 @@ class TestApp(TestWrapper, TestClient):
                    " priceFiveSecsAgo={}"
                    " targetShortPos={}"
                    " latestPos={}"
-                   " sellAttempt={}"
-                   " autoMode={}").format(tpItem.symbol,
+                   " sellAttempt={}").format(tpItem.symbol,
                                         close,
                                         targetSellPrice,
                                         tpItem.priceFiveSecsAgo,
                                         tpItem.targetShortPos,
                                         tpItem.latestPos,
-                                        tpItem.sellAttempt,
-                                        tpItem.autoMode)
+                                        tpItem.sellAttempt)
             print(msg)
             logging.info(msg)
 
@@ -429,8 +426,8 @@ class TestApp(TestWrapper, TestClient):
 
 def main():
     SetupLogger()
-    logging.debug("now is %s", datetime.datetime.now())
     logging.getLogger().setLevel(logging.INFO)
+    logging.info("now is %s", datetime.datetime.now())
 
     try:
         app = TestApp()

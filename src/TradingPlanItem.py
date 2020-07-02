@@ -24,14 +24,12 @@ class TradingPlanItem:
         self.lastOrderId = None
         self.positionInitialized = False
         self.todayOpenPrice = None
-        self.autoMode = False
 
     def __str__(self):
-        return ("symbol = %s;\treqId=%d;\tautoMode=%s;\ttargetBuyPrice=%10f;\ttargetSellPrice=%10f;\t"
+        return ("symbol = %s;\treqId=%d;\ttargetBuyPrice=%10f;\ttargetSellPrice=%10f;\t"
                 "targetLongPos=%d;\ttargetShortPos=%d;" %
                 (self.symbol,
                  self.reqId,
-                 self.autoMode,
                  self.targetBuyPrice,
                  self.targetSellPrice,
                  self.targetLongPos,
@@ -43,8 +41,7 @@ class TradingPlanItem:
               targetBuyPrice: float,
               targetSellPrice: float,
               targetLongPos: int,
-              targetShortPos: int,
-              autoMode: bool):
+              targetShortPos: int):
         if not self.readOnly:
             self.symbol = symbol
             self.reqId = reqId
@@ -52,7 +49,6 @@ class TradingPlanItem:
             self.targetSellPrice = targetSellPrice
             self.targetLongPos = targetLongPos
             self.targetShortPos = targetShortPos
-            self.autoMode = autoMode
             self.readOnly = True
         else:
             logging.error("ERROR. You're trying to override the TrandingPlanItem of: ", self)
