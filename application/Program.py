@@ -221,7 +221,6 @@ class TestApp(TestWrapper, TestClient):
             self.reqGlobalCancel()
             # Request RealTime market data
             self.reqMarketDataType(MarketDataTypeEnum.REALTIME)
-            #self.accountOperations_req()
 
             # Request position updates
             self.reqPositions()
@@ -334,39 +333,31 @@ class TestApp(TestWrapper, TestClient):
             close >= tpItem.priceFiveSecsAgo and
             targetBuyPrice >= tpItem.priceFiveSecsAgo):
 
-            # Cancel the open order. Maybe the order has not been filled already.
-            if (tpItem.lastOrderId is not None):
-                self.cancelOrder(tpItem.lastOrderId)
+            ## Cancel the open order. Maybe the order has not been filled already.
+            #if (tpItem.lastOrderId is not None):
+            #    self.cancelOrder(tpItem.lastOrderId)
 
             # Increment buy attempt count
             tpItem.buyAttempt += 1
 
-            print("@@@ BUY ", tpItem.symbol, "is triggered. @@@",
-                  " autoMode is ", tpItem.autoMode,
-                  " Today's Open price is ", tpItem.todayOpenPrice,
-                  " Its current price is ", close,
-                  " targetBuyPrice is ", targetBuyPrice,
-                  " priceFiveSecsAgo is ", tpItem.priceFiveSecsAgo,
-                  " targetLongPos is ", tpItem.targetLongPos,
-                  " latestPos is ", tpItem.latestPos,
-                  " buyAttempt is ", tpItem.buyAttempt)
+            msg = ("@@@ BUY {} is triggered. @@@"
+                   " current price={}"
+                   " targetBuyPrice={}"
+                   " priceFiveSecsAgo={}"
+                   " targetLongPos={}"
+                   " latestPos={}"
+                   " buyAttempt={}"
+                   " autoMode={}").format(tpItem.symbol,
+                                        close,
+                                        targetBuyPrice,
+                                        tpItem.priceFiveSecsAgo,
+                                        tpItem.targetLongPos,
+                                        tpItem.latestPos,
+                                        tpItem.buyAttempt,
+                                        tpItem.autoMode)
 
-            logging.info("@@@ BUY %s is triggered. @@@"
-                         " autoMode is %s;"
-                         " Its current price is %f;"
-                         " targetBuyPrice is %f;"
-                         " priceFiveSecsAgo is %f;"
-                         " targetLongPos is %d;"
-                         " latestPos is %d;"
-                         " buyAttempt is %d;" %
-                         (tpItem.symbol,
-                          tpItem.autoMode,
-                          close,
-                          targetBuyPrice,
-                          tpItem.priceFiveSecsAgo,
-                          tpItem.targetLongPos,
-                          tpItem.latestPos,
-                          tpItem.buyAttempt))
+            print(msg)
+            logging.info(msg)
 
             # Place a buy order
             myContract  = Contracts.USStockAtSmart(tpItem.symbol)
@@ -385,39 +376,30 @@ class TestApp(TestWrapper, TestClient):
             close < tpItem.priceFiveSecsAgo and
             targetSellPrice <= tpItem.priceFiveSecsAgo):
 
-            # Cancel the open order. Maybe the order has not been filled already.
-            if (tpItem.lastOrderId != None):
-                self.cancelOrder(tpItem.lastOrderId)
+            ## Cancel the open order. Maybe the order has not been filled already.
+            #if (tpItem.lastOrderId != None):
+            #    self.cancelOrder(tpItem.lastOrderId)
 
             # Increment sell attempt count
             tpItem.sellAttempt += 1
 
-            print("@@@ SELL", tpItem.symbol, "is triggered. @@@",
-                  " autoMode is ", tpItem.autoMode,
-                  " Today's Open price is ", tpItem.todayOpenPrice,
-                  " Its current price is ", close,
-                  " targetSellPrice is ", targetSellPrice,
-                  " priceFiveSecsAgo is ", tpItem.priceFiveSecsAgo,
-                  " targetShortPos is ", tpItem.targetShortPos,
-                  " latestPos is ", tpItem.latestPos,
-                  " sellAttempt is ", tpItem.sellAttempt)
-
-            logging.info("@@@ SELL %s is triggered. @@@"
-                         " autoMode is %s;"
-                         " current price is %f;"
-                         " targetSellPrice is %f;"
-                         " priceFiveSecsAgo is %f;"
-                         " targetShortPos is %d;"
-                         " latestPos is %d;"
-                         " sellAttempt is %d;" %
-                         (tpItem.symbol,
-                          tpItem.autoMode,
-                          close,
-                          targetSellPrice,
-                          tpItem.priceFiveSecsAgo,
-                          tpItem.targetShortPos,
-                          tpItem.latestPos,
-                          tpItem.sellAttempt))
+            msg = ("@@@ SELL {} is triggered. @@@"
+                   " current price={}"
+                   " targetSellPrice={}"
+                   " priceFiveSecsAgo={}"
+                   " targetShortPos={}"
+                   " latestPos={}"
+                   " sellAttempt={}"
+                   " autoMode={}").format(tpItem.symbol,
+                                        close,
+                                        targetSellPrice,
+                                        tpItem.priceFiveSecsAgo,
+                                        tpItem.targetShortPos,
+                                        tpItem.latestPos,
+                                        tpItem.sellAttempt,
+                                        tpItem.autoMode)
+            print(msg)
+            logging.info(msg)
 
             # Place a sell order
             myContract  = Contracts.USStockAtSmart(tpItem.symbol)
@@ -437,41 +419,13 @@ class TestApp(TestWrapper, TestClient):
     @iswrapper
     # ! [historicaldata]
     def historicalData(self, reqId:int, bar: BarData):
-        print("HistoricalData. ReqId:", reqId, "BarData.", bar)
         tpItem = self.tradingPlan.plan[reqId]
         if (tpItem.todayOpenPrice == None):
             tpItem.todayOpenPrice = bar.open
-            print("Set ", tpItem.symbol, " Open price to ", bar.open)
+            print("Set", tpItem.symbol, "open price to ", bar.open)
             logging.info("Set %s Open price to %f" % (tpItem.symbol, bar.open))
         super().historicalData(reqId, bar)
     # ! [historicaldata]
-
-    @iswrapper
-    # ! [historicaldataend]
-    def historicalDataEnd(self, reqId: int, start: str, end: str):
-        super().historicalDataEnd(reqId, start, end)
-        print("HistoricalDataEnd. ReqId:", reqId, "from", start, "to", end)
-    # ! [historicaldataend]
-
-    @iswrapper
-    # ! [completedorder]
-    def completedOrder(self, contract: Contract, order: Order,
-                  orderState: OrderState):
-        super().completedOrder(contract, order, orderState)
-        print("CompletedOrder. PermId:", order.permId, "ParentPermId:", utils.longToStr(order.parentPermId), "Account:", order.account,
-              "Symbol:", contract.symbol, "SecType:", contract.secType, "Exchange:", contract.exchange,
-              "Action:", order.action, "OrderType:", order.orderType, "TotalQty:", order.totalQuantity,
-              "CashQty:", order.cashQty, "FilledQty:", order.filledQuantity,
-              "LmtPrice:", order.lmtPrice, "AuxPrice:", order.auxPrice, "Status:", orderState.status,
-              "Completed time:", orderState.completedTime, "Completed Status:" + orderState.completedStatus)
-    # ! [completedorder]
-
-    @iswrapper
-    # ! [completedordersend]
-    def completedOrdersEnd(self):
-        super().completedOrdersEnd()
-        print("CompletedOrdersEnd")
-    # ! [completedordersend]
 
 def main():
     SetupLogger()
@@ -483,7 +437,7 @@ def main():
         # ! [connect]
         # Paper trading port number: 7497
         # Live trading port number:  7496
-        app.connect("127.0.0.1", 7497, clientId=95131)
+        app.connect("127.0.0.1", 7496, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
