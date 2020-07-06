@@ -313,7 +313,7 @@ class TestApp(TestWrapper, TestClient):
 
             print("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
                   (tpItem.symbol, tpItem.buyAttempt))
-            logging.info("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
+            logging.error("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
                          (tpItem.symbol, tpItem.buyAttempt))
             tpItem.targetLongPos = 0
 
@@ -322,7 +322,7 @@ class TestApp(TestWrapper, TestClient):
 
             print("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
                   (tpItem.symbol, tpItem.sellAttempt))
-            logging.info("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
+            logging.error("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
                          (tpItem.symbol, tpItem.sellAttempt))
             tpItem.targetShortPos   = 0
 
@@ -362,6 +362,7 @@ class TestApp(TestWrapper, TestClient):
             myContract  = Contracts.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
             myOrderSize = tpItem.targetLongPos - tpItem.latestPos
+            #myOrder     = Orders.PeggedToMarket("BUY", myOrderSize, 0.1)
             myOrder     = Orders.MarketOrder("BUY", myOrderSize)
 
             self.placeOrder(myOrderId, myContract, myOrder)
@@ -434,7 +435,7 @@ def main():
         # ! [connect]
         # Paper trading port number: 7497
         # Live trading port number:  7496
-        app.connect("127.0.0.1", 7496, clientId=95131)
+        app.connect("127.0.0.1", 7497, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))

@@ -43,3 +43,23 @@ class Orders:
         order.lmtPrice = limitPrice
         # ! [limitorder]
         return order
+
+    """ <summary>
+    #/ A pegged-to-market order is designed to maintain a purchase price relative to the national best offer (NBO) or a sale price 
+    #/ relative to the national best bid (NBB). Depending on the width of the quote, this order may be passive or aggressive. 
+    #/ The trader creates the order by entering a limit price which defines the worst limit price that they are willing to accept. 
+    #/ Next, the trader enters an offset amount which computes the active limit price as follows:
+    #/     Sell order price = Bid price + offset amount
+    #/     Buy order price = Ask price - offset amount
+    #/ Products: STK
+    </summary>"""
+    @staticmethod
+    def PeggedToMarket(action: str, quantity: float, marketOffset: float):
+        # ! [pegged_market]
+        order = Order()
+        order.action = action
+        order.orderType = "PEG MKT"
+        order.totalQuantity = quantity
+        order.auxPrice = marketOffset  # Offset price
+        # ! [pegged_market]
+        return order

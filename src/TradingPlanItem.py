@@ -12,8 +12,8 @@ class TradingPlanItem:
         self.targetSellPrice = None
         self.targetLongPos = None
         self.targetShortPos = None
-        self.targetBuyAttempt = 100
-        self.targetSellAttempt = 100
+        self.targetBuyAttempt = 7
+        self.targetSellAttempt = 7
         self.reqId = None
         self.readOnly = False
         self.priceFiveSecsAgo = None
