@@ -328,7 +328,8 @@ class TestApp(TestWrapper, TestClient):
 
         # Detect price movement with reference to the price target
         # Buy
-        if (tpItem.latestPos < tpItem.targetLongPos and
+        if (tpItem.buyMode == "on" and
+            tpItem.latestPos < tpItem.targetLongPos and
             tpItem.priceFiveSecsAgo is not None and
             close >= targetBuyPrice and
             close >= tpItem.priceFiveSecsAgo and
@@ -370,7 +371,8 @@ class TestApp(TestWrapper, TestClient):
             tpItem.lastOrderId = myOrderId
 
         # Sell
-        if (tpItem.latestPos > tpItem.targetShortPos and
+        if (tpItem.buyMode == "on" and
+            tpItem.latestPos > tpItem.targetShortPos and
             tpItem.priceFiveSecsAgo is not None and
             close < targetSellPrice and
             close < tpItem.priceFiveSecsAgo and
