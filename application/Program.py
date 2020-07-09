@@ -429,7 +429,7 @@ def main():
         # ! [connect]
         # Paper trading port number: 7497
         # Live trading port number:  7496
-        app.connect("127.0.0.1", 7497, clientId=95131)
+        app.connect("127.0.0.1", 7496, clientId=95131)
         # ! [connect]
         print("serverVersion:%s connectionTime:%s" % (app.serverVersion(),
                                                       app.twsConnectionTime()))
