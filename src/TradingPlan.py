@@ -20,16 +20,15 @@ class TradingPlan:
             reqId = reqId + 1
             tpItem = TradingPlanItem()
             targetBuyPrice = item["TARGET_BUY_PRICE"]
-            targetSellPrice = round(targetBuyPrice * 0.9983, 2)
+            targetSellPrice = round(targetBuyPrice * 0.998, 2)
             tpItem.setup(item["SYMBOL"],
-                         item["BUY_MODE"],
-                         item["SELL_MODE"],
+                         item["ENABLED"],
                          reqId,
                          targetBuyPrice, targetSellPrice,
                          item["TARGET_LONG_POS"],
                          item["TARGET_SHORT_POS"],
-                         item["TARGET_BUY_ATTEMPT"],
-                         item["TARGET_SELL_ATTEMPT"])
+                         item["BUY_ATTEMPT_LIMIT"],
+                         item["SELL_ATTEMPT_LIMIT"])
             self.addPlanItem(tpItem)
 
     def __str__(self):

@@ -288,11 +288,8 @@ class TestApp(TestWrapper, TestClient):
             tpItem.positionInitialized = True
             tpItem.lastPos   = position
             tpItem.latestPos = position
+            logging.error("lastPos & latestPos of {} is initialized to {}".format(tpItem.symbol, position))
 
-        #if (tpItem.latestPos > tpItem.lastPos):
-        #    tpItem.buyAttempt = 0
-        #elif (tpItem.latestPos < tpItem.lastPos):
-        #    tpItem.sellAttempt = 0
     # ! [position]
 
     @iswrapper
@@ -308,27 +305,21 @@ class TestApp(TestWrapper, TestClient):
 
         # If we've tried more than X times to establish a position, we'll clear
         # our target position, so we'd stay away from the stock for a while.
-        if (tpItem.buyAttempt >= tpItem.targetBuyAttempt and
+        if (tpItem.buyAttempted >= tpItem.buyAttemptLimit and
             tpItem.targetLongPos > 0):
 
-            print("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
-                  (tpItem.symbol, tpItem.buyAttempt))
-            logging.error("Resetting targetLongPos for %s to 0; buyAttempt is %d" %
-                         (tpItem.symbol, tpItem.buyAttempt))
+            logging.error(f"Resetting targetLongPos for {tpItem.symbol} to 0; buyAttempted is {tpItem.buyAttempted}")
             tpItem.targetLongPos = 0
 
-        if (tpItem.sellAttempt >= tpItem.targetSellAttempt and
+        if (tpItem.sellAttempted >= tpItem.sellAttemptLimit and
             tpItem.targetShortPos < 0):
 
-            print("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
-                  (tpItem.symbol, tpItem.sellAttempt))
-            logging.error("Resetting targetShortPos for %s to 0; sellAttempt is %d" %
-                         (tpItem.symbol, tpItem.sellAttempt))
+            logging.error(f"Resetting targetShortPos for {tpItem.symbol} to 0; sellAttempted is {tpItem.sellAttempted}")
             tpItem.targetShortPos   = 0
 
         # Detect price movement with reference to the price target
         # Buy
-        if (tpItem.buyMode == "on" and
+        if (tpItem.enabled and
             tpItem.latestPos < tpItem.targetLongPos and
             tpItem.priceFiveSecsAgo is not None and
             close >= targetBuyPrice and
@@ -340,7 +331,7 @@ class TestApp(TestWrapper, TestClient):
             #    self.cancelOrder(tpItem.lastOrderId)
 
             # Increment buy attempt count
-            tpItem.buyAttempt += 1
+            tpItem.buyAttempted += 1
 
             msg = ("@@@ BUY {} is triggered. @@@"
                    " current price={}"
@@ -348,13 +339,13 @@ class TestApp(TestWrapper, TestClient):
                    " priceFiveSecsAgo={}"
                    " targetLongPos={}"
                    " latestPos={}"
-                   " buyAttempt={}").format(tpItem.symbol,
+                   " buyAttempted={}").format(tpItem.symbol,
                                         close,
                                         targetBuyPrice,
                                         tpItem.priceFiveSecsAgo,
                                         tpItem.targetLongPos,
                                         tpItem.latestPos,
-                                        tpItem.buyAttempt)
+                                        tpItem.buyAttempted)
 
             print(msg)
             logging.info(msg)
@@ -371,7 +362,7 @@ class TestApp(TestWrapper, TestClient):
             tpItem.lastOrderId = myOrderId
 
         # Sell
-        if (tpItem.buyMode == "on" and
+        if (tpItem.enabled and
             tpItem.latestPos > tpItem.targetShortPos and
             tpItem.priceFiveSecsAgo is not None and
             close < targetSellPrice and
@@ -383,7 +374,7 @@ class TestApp(TestWrapper, TestClient):
             #    self.cancelOrder(tpItem.lastOrderId)
 
             # Increment sell attempt count
-            tpItem.sellAttempt += 1
+            tpItem.sellAttempted += 1
 
             msg = ("@@@ SELL {} is triggered. @@@"
                    " current price={}"
@@ -391,13 +382,13 @@ class TestApp(TestWrapper, TestClient):
                    " priceFiveSecsAgo={}"
                    " targetShortPos={}"
                    " latestPos={}"
-                   " sellAttempt={}").format(tpItem.symbol,
+                   " sellAttempted={}").format(tpItem.symbol,
                                         close,
                                         targetSellPrice,
                                         tpItem.priceFiveSecsAgo,
                                         tpItem.targetShortPos,
                                         tpItem.latestPos,
-                                        tpItem.sellAttempt)
+                                        tpItem.sellAttempted)
             print(msg)
             logging.info(msg)
 
@@ -411,6 +402,8 @@ class TestApp(TestWrapper, TestClient):
 
             tpItem.lastOrderId = myOrderId
 
+        if tpItem.priceFiveSecsAgo is None:
+            logging.error("priceFiveSecsAgo of {} is initialized to {}".format(tpItem.symbol, close))
         # Update priceFiveSecsAgo
         tpItem.priceFiveSecsAgo = close
 
@@ -422,8 +415,7 @@ class TestApp(TestWrapper, TestClient):
         tpItem = self.tradingPlan.plan[reqId]
         if (tpItem.todayOpenPrice == None):
             tpItem.todayOpenPrice = bar.open
-            print("Set", tpItem.symbol, "open price to ", bar.open)
-            logging.info("Set %s Open price to %f" % (tpItem.symbol, bar.open))
+            logging.error("Set %s Open price to %f" % (tpItem.symbol, bar.open))
         super().historicalData(reqId, bar)
     # ! [historicaldata]
 
