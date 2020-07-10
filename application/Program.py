@@ -288,7 +288,7 @@ class TestApp(TestWrapper, TestClient):
             tpItem.positionInitialized = True
             tpItem.lastPos   = position
             tpItem.latestPos = position
-            logging.error("lastPos & latestPos of {} is initialized to {}".format(tpItem.symbol, position))
+            logging.critical("lastPos & latestPos of {} is initialized to {}".format(tpItem.symbol, position))
 
     # ! [position]
 
@@ -308,13 +308,13 @@ class TestApp(TestWrapper, TestClient):
         if (tpItem.buyAttempted >= tpItem.buyAttemptLimit and
             tpItem.targetLongPos > 0):
 
-            logging.error(f"Resetting targetLongPos for {tpItem.symbol} to 0; buyAttempted is {tpItem.buyAttempted}")
+            logging.critical(f"Resetting targetLongPos for {tpItem.symbol} to 0; buyAttempted is {tpItem.buyAttempted}")
             tpItem.targetLongPos = 0
 
         if (tpItem.sellAttempted >= tpItem.sellAttemptLimit and
             tpItem.targetShortPos < 0):
 
-            logging.error(f"Resetting targetShortPos for {tpItem.symbol} to 0; sellAttempted is {tpItem.sellAttempted}")
+            logging.critical(f"Resetting targetShortPos for {tpItem.symbol} to 0; sellAttempted is {tpItem.sellAttempted}")
             tpItem.targetShortPos   = 0
 
         # Detect price movement with reference to the price target
@@ -330,26 +330,6 @@ class TestApp(TestWrapper, TestClient):
             #if (tpItem.lastOrderId is not None):
             #    self.cancelOrder(tpItem.lastOrderId)
 
-            # Increment buy attempt count
-            tpItem.buyAttempted += 1
-
-            msg = ("@@@ BUY {} is triggered. @@@"
-                   " current price={}"
-                   " targetBuyPrice={}"
-                   " priceFiveSecsAgo={}"
-                   " targetLongPos={}"
-                   " latestPos={}"
-                   " buyAttempted={}").format(tpItem.symbol,
-                                        close,
-                                        targetBuyPrice,
-                                        tpItem.priceFiveSecsAgo,
-                                        tpItem.targetLongPos,
-                                        tpItem.latestPos,
-                                        tpItem.buyAttempted)
-
-            print(msg)
-            logging.info(msg)
-
             # Place a buy order
             myContract  = Contracts.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
@@ -360,6 +340,23 @@ class TestApp(TestWrapper, TestClient):
             self.placeOrder(myOrderId, myContract, myOrder)
 
             tpItem.lastOrderId = myOrderId
+
+            # Increment buy attempt count
+            tpItem.buyAttempted += 1
+
+            logging.critical("@@@ BUY {} is triggered. "
+                             " current price={}"
+                             " targetBuyPrice={}"
+                             " priceFiveSecsAgo={}"
+                             " targetLongPos={}"
+                             " latestPos={}"
+                             " buyAttempted={}").format(tpItem.symbol,
+                                                        close,
+                                                        targetBuyPrice,
+                                                        tpItem.priceFiveSecsAgo,
+                                                        tpItem.targetLongPos,
+                                                        tpItem.latestPos,
+                                                        tpItem.buyAttempted)
 
         # Sell
         if (tpItem.enabled and
@@ -373,25 +370,6 @@ class TestApp(TestWrapper, TestClient):
             #if (tpItem.lastOrderId != None):
             #    self.cancelOrder(tpItem.lastOrderId)
 
-            # Increment sell attempt count
-            tpItem.sellAttempted += 1
-
-            msg = ("@@@ SELL {} is triggered. @@@"
-                   " current price={}"
-                   " targetSellPrice={}"
-                   " priceFiveSecsAgo={}"
-                   " targetShortPos={}"
-                   " latestPos={}"
-                   " sellAttempted={}").format(tpItem.symbol,
-                                        close,
-                                        targetSellPrice,
-                                        tpItem.priceFiveSecsAgo,
-                                        tpItem.targetShortPos,
-                                        tpItem.latestPos,
-                                        tpItem.sellAttempted)
-            print(msg)
-            logging.info(msg)
-
             # Place a sell order
             myContract  = Contracts.USStockAtSmart(tpItem.symbol)
             myOrderId   = self.nextOrderId()
@@ -402,8 +380,26 @@ class TestApp(TestWrapper, TestClient):
 
             tpItem.lastOrderId = myOrderId
 
+            # Increment sell attempt count
+            tpItem.sellAttempted += 1
+
+            logging.critical("@@@ SELL {} is triggered."
+                   " current price={}"
+                   " targetSellPrice={}"
+                   " priceFiveSecsAgo={}"
+                   " targetShortPos={}"
+                   " latestPos={}"
+                   " sellAttempted={}".format(tpItem.symbol,
+                                              close,
+                                              targetSellPrice,
+                                              tpItem.priceFiveSecsAgo,
+                                              tpItem.targetShortPos,
+                                              tpItem.latestPos,
+                                              tpItem.sellAttempted))
+
         if tpItem.priceFiveSecsAgo is None:
-            logging.error("priceFiveSecsAgo of {} is initialized to {}".format(tpItem.symbol, close))
+            logging.critical("priceFiveSecsAgo of {} is initialized to {}".format(tpItem.symbol, close))
+
         # Update priceFiveSecsAgo
         tpItem.priceFiveSecsAgo = close
 
@@ -415,7 +411,7 @@ class TestApp(TestWrapper, TestClient):
         tpItem = self.tradingPlan.plan[reqId]
         if (tpItem.todayOpenPrice == None):
             tpItem.todayOpenPrice = bar.open
-            logging.error("Set %s Open price to %f" % (tpItem.symbol, bar.open))
+            logging.critical("Set %s Open price to %f" % (tpItem.symbol, bar.open))
         super().historicalData(reqId, bar)
     # ! [historicaldata]
 
