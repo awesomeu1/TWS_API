@@ -414,7 +414,7 @@ class TestApp(TestWrapper, TestClient):
 
 def wait_and_refresh_trading_plan(app: TestApp):
     while True:
-        do_refresh = input("Do you want to refresh trading plan?[yes or no]:")
+        do_refresh = input("Do you want to refresh trading plan?[yes or no]:\n")
         if do_refresh == "yes":
             app.setupTradingPlan(firstTime=False)
 
@@ -436,6 +436,9 @@ def main():
         # setup tranding plan
         app.tradingPlan = TradingPlan("MarketWatcher")
         app.setupTradingPlan(firstTime=True)
+
+        refresh_tplan = threading.Thread(target=wait_and_refresh_trading_plan, args=(app,))
+        refresh_tplan.start()
 
         # ! [clientrun]
         app.run()
