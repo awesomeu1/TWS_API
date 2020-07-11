@@ -7,11 +7,10 @@ import argparse
 import datetime
 import collections
 import inspect
-
 import logging
 import time
 import os.path
-import yaml
+import threading
 
 from ibapi import wrapper
 from ibapi import utils
@@ -195,17 +194,14 @@ class TestApp(TestWrapper, TestClient):
         # we can start now
         self.start()
 
-    def setupTradingPlan(self):
-        self.tradingPlan = TradingPlan("MarketWatcher")
-
-        tPlanFile = open("trading_plan.yml", "r")
-        tPlanYaml = yaml.load(tPlanFile, Loader=yaml.FullLoader)
-        tPlanFile.close()
-
+    def setupTradingPlan(self, firstTime: bool):
         # ReqId begins at 8800
-        self.tradingPlan.parseYaml(tPlanYaml, 8800)
-        print(self.tradingPlan)
-        logging.info(self.tradingPlan)
+        self.tradingPlan.parseYaml("trading_plan.yml", firstTime, 8800)
+        if firstTime:
+            logging.critical("First time setting up the trading plan.")
+        else:
+            logging.critical("Refreshing trading plan.")
+        logging.critical(self.tradingPlan)
 
     def start(self):
         if self.started:
@@ -415,6 +411,13 @@ class TestApp(TestWrapper, TestClient):
         super().historicalData(reqId, bar)
     # ! [historicaldata]
 
+
+def wait_and_refresh_trading_plan(app: TestApp):
+    while True:
+        do_refresh = input("Do you want to refresh trading plan?[yes or no]:")
+        if do_refresh == "yes":
+            app.setupTradingPlan(firstTime=False)
+
 def main():
     SetupLogger()
     logging.getLogger().setLevel(logging.INFO)
@@ -431,7 +434,8 @@ def main():
                                                       app.twsConnectionTime()))
 
         # setup tranding plan
-        app.setupTradingPlan()
+        app.tradingPlan = TradingPlan("MarketWatcher")
+        app.setupTradingPlan(firstTime=True)
 
         # ! [clientrun]
         app.run()

@@ -1,3 +1,4 @@
+import yaml
 from ibapi.common import *
 from TradingPlanItem import TradingPlanItem
 
@@ -13,12 +14,21 @@ class TradingPlan:
         self.plan.update({item.reqId: item})
         self.planKeyedBySymbol.update({item.symbol: item})
 
-    def parseYaml(self, yml, startingReqId: TickerId):
+    def parseYaml(self, tPlanFileName: str, firstTime: bool, startingReqId: TickerId):
+        tPlanFile = open(tPlanFileName, "r")
+        tPlanYaml = yaml.load(tPlanFile, Loader=yaml.FullLoader)
+        tPlanFile.close()
+
         reqId = startingReqId
 
-        for item in yml:
+        for item in tPlanYaml:
             reqId = reqId + 1
-            tpItem = TradingPlanItem()
+
+            if firstTime:
+                tpItem = TradingPlanItem()
+            else:
+                tpItem = self.planKeyedBySymbol[item["SYMBOL"]]
+
             targetBuyPrice = item["TARGET_BUY_PRICE"]
             targetSellPrice = round(targetBuyPrice * 0.998, 2)
             tpItem.setup(item["SYMBOL"],
