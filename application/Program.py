@@ -350,13 +350,13 @@ class TestApp(TestWrapper, TestClient):
                              " priceFiveSecsAgo={}"
                              " targetLongPos={}"
                              " latestPos={}"
-                             " buyAttempted={}").format(tpItem.symbol,
+                             " buyAttempted={}".format(tpItem.symbol,
                                                         close,
                                                         targetBuyPrice,
                                                         tpItem.priceFiveSecsAgo,
                                                         tpItem.targetLongPos,
                                                         tpItem.latestPos,
-                                                        tpItem.buyAttempted)
+                                                        tpItem.buyAttempted))
 
         # Sell
         if (tpItem.enabled and
