@@ -276,6 +276,14 @@ class TestApp(TestWrapper, TestClient):
               "Position:", position, "Avg cost:", avgCost)
 
         tpItem = self.tradingPlan.planKeyedBySymbol[contract.symbol]
+
+        tpItem = None
+        if contract.symbol in self.tradingPlan.planKeyedBySymbol:
+            tpItem = self.tradingPlan.planKeyedBySymbol[contract.symbol]
+        else:
+            logging.error("ERROR: {}. Cannot find item in trading plan matching symbol={}".format(__name__, contract.symbol))
+            return
+
         # Update position info
         if (tpItem.positionInitialized):
             tpItem.lastPos     = tpItem.latestPos
@@ -294,7 +302,12 @@ class TestApp(TestWrapper, TestClient):
                         volume: int, wap: float, count: int):
         super().realtimeBar(reqId, time, open_, high, low, close, volume, wap, count)
 
-        tpItem = self.tradingPlan.plan[reqId]
+        tpItem = None
+        if reqId in self.tradingPlan.plan:
+            tpItem = self.tradingPlan.plan[reqId]
+        else:
+            logging.error("ERROR: {}. Cannot find item in trading plan matching reqId={}".format(__name__, reqId))
+            return
 
         targetBuyPrice  = tpItem.targetBuyPrice
         targetSellPrice = tpItem.targetSellPrice
@@ -404,7 +417,13 @@ class TestApp(TestWrapper, TestClient):
     @iswrapper
     # ! [historicaldata]
     def historicalData(self, reqId:int, bar: BarData):
-        tpItem = self.tradingPlan.plan[reqId]
+        tpItem = None
+        if reqId in self.tradingPlan.plan:
+            tpItem = self.tradingPlan.plan[reqId]
+        else:
+            logging.error("ERROR: {}. Cannot find item in trading plan matching reqId={}".format(__name__, reqId))
+            return
+
         if (tpItem.todayOpenPrice == None):
             tpItem.todayOpenPrice = bar.open
             logging.critical("Set %s Open price to %f" % (tpItem.symbol, bar.open))
