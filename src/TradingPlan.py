@@ -30,7 +30,7 @@ class TradingPlan:
                 tpItem = self.planKeyedBySymbol[item["SYMBOL"]]
 
             targetBuyPrice = item["TARGET_BUY_PRICE"]
-            targetSellPrice = round(targetBuyPrice * 0.998, 2)
+            targetSellPrice = round(targetBuyPrice * 0.997, 2)
             tpItem.setup(item["SYMBOL"],
                          item["ENABLED"],
                          reqId,
